@@ -17,7 +17,6 @@ public class CompressHandler {
     }
 
     public void run() {
-
     }
 
 }
