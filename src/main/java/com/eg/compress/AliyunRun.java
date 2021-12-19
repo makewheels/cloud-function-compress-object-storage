@@ -8,8 +8,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class AliyunRun implements StreamRequestHandler {
+    private final CompressHandler compressHandler = new CompressHandler();
+
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        System.out.println(System.currentTimeMillis() + "FWEF");
+        InvokeUtil.init(input, output, context);
+        compressHandler.initS3();
+        compressHandler.run();
     }
 }
