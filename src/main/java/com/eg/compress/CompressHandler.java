@@ -106,7 +106,7 @@ public class CompressHandler {
         File manifestFile = new File(compressFolder, zipId + ".manifest");
         FileUtil.writeString(manifest.toJSONString(), manifestFile, StandardCharsets.UTF_8);
 
-        //压缩
+        // 压缩
         File zipFile = new File(workDir, zipId + ".zip");
         System.out.println("压缩文件，源文件夹：" + compressFolder.getAbsolutePath());
         System.out.println("压缩文件，目标文件：" + zipFile.getAbsolutePath());
@@ -118,6 +118,10 @@ public class CompressHandler {
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 s3Service.getBucketName(), zipKey, zipFile);
         putObjectRequest.withStorageClass(StorageClass.StandardInfrequentAccess);
+        List<Tag> tags = new ArrayList<>();
+        tags.add(new Tag("type", "compress-package"));
+        ObjectTagging objectTagging = new ObjectTagging(tags);
+        putObjectRequest.withTagging(objectTagging);
         s3Service.putObject(putObjectRequest);
 
         // 删除对象存储data文件
