@@ -6,12 +6,8 @@ import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.aliyun.oss.model.StorageClass;
 import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import com.github.makewheels.s3util.S3Config;
 import com.github.makewheels.s3util.S3Service;
 
@@ -102,7 +98,7 @@ public class CompressHandler {
         // 上传zip到对象存储，直接把类型设为低频
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 s3Service.getBucketName(), prefix + "/archive/", zipFile);
-        putObjectRequest.withStorageClass(StorageClass.IA.name());
+        putObjectRequest.withStorageClass(StorageClass.OneZoneInfrequentAccess);
         s3Service.putObject(putObjectRequest);
 
         // 删除对象存储data文件
