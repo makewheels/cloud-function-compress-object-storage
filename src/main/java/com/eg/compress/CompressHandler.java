@@ -17,6 +17,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CompressHandler {
     private final S3Service s3Service = new S3Service();
@@ -58,15 +60,20 @@ public class CompressHandler {
         if (!compressFolder.exists()) {
             compressFolder.mkdirs();
         }
+
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
         System.out.println("开始下载 " + System.currentTimeMillis());
         for (S3ObjectSummary objectSummary : objectSummaries) {
             String key = objectSummary.getKey();
 
             File file = new File(compressFolder, FileUtil.getName(key));
             String url = s3Service.generatePresignedUrl(key, Duration.ofHours(1), HttpMethod.GET);
-            HttpUtil.downloadFile(url, file);
+            executorService.submit(() -> {
+                HttpUtil.downloadFile(url, file);
+            });
         }
         System.out.println("结束下载 " + System.currentTimeMillis());
+        executorService.shutdown();
 
         // 组装zip清单文件
         String zipId = IdUtil.getSnowflake().nextIdStr();
