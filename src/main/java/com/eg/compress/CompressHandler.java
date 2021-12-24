@@ -98,7 +98,7 @@ public class CompressHandler {
         // 上传zip到对象存储，直接把类型设为低频
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 s3Service.getBucketName(), prefix + "/archive/", zipFile);
-        putObjectRequest.withStorageClass(StorageClass.OneZoneInfrequentAccess);
+        putObjectRequest.withStorageClass(StorageClass.StandardInfrequentAccess);
         s3Service.putObject(putObjectRequest);
 
         // 删除对象存储data文件
