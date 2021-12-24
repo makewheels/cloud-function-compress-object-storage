@@ -76,6 +76,7 @@ public class CompressHandler {
         manifest.put("provider", "aliyun-fc");
         manifest.put("createTime", Instant.now().toString());
         manifest.put("compressId", zipId);
+        manifest.put("providerParams", InvokeUtil.getProviderParams());
 
         JSONArray fileList = new JSONArray();
         for (S3ObjectSummary objectSummary : objectSummaries) {

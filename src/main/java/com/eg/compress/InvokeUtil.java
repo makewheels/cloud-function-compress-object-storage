@@ -1,7 +1,9 @@
 package com.eg.compress;
 
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.fc.runtime.Context;
+import com.aliyun.fc.runtime.FunctionParam;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,5 +34,15 @@ public class InvokeUtil {
         InvokeUtil.input = input;
         InvokeUtil.output = output;
         InvokeUtil.context = context;
+    }
+
+    public static JSONObject getProviderParams() {
+        JSONObject providerParams = new JSONObject();
+        Context context = InvokeUtil.getContext();
+        String requestId = context.getRequestId();
+        FunctionParam functionParam = context.getFunctionParam();
+        providerParams.put("requestId", requestId);
+        providerParams.put("functionParam", functionParam);
+        return providerParams;
     }
 }
