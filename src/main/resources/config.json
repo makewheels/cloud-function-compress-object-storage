@@ -3,11 +3,11 @@
   "pathList": [
     {
       "prefix": "spider/huobi/buy-usdt-cny",
-      "fileAmountForCompress": 200
+      "fileAmountForCompress": 100
     },
     {
       "prefix": "spider/huobi/sell-usdt-cny",
-      "fileAmountForCompress": 200
+      "fileAmountForCompress": 100
     }
   ]
 }

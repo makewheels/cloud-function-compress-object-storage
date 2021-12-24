@@ -58,12 +58,15 @@ public class CompressHandler {
         if (!compressFolder.exists()) {
             compressFolder.mkdirs();
         }
+        System.out.println("开始下载 " + System.currentTimeMillis());
         for (S3ObjectSummary objectSummary : objectSummaries) {
             String key = objectSummary.getKey();
-            File file = new File(compressFolder, key);
+
+            File file = new File(compressFolder, FileUtil.getName(key));
             String url = s3Service.generatePresignedUrl(key, Duration.ofHours(1), HttpMethod.GET);
             HttpUtil.downloadFile(url, file);
         }
+        System.out.println("结束下载 " + System.currentTimeMillis());
 
         // 组装zip清单文件
         String zipId = IdUtil.getSnowflake().nextIdStr();
@@ -97,6 +100,7 @@ public class CompressHandler {
 
         // 上传zip到对象存储，直接把类型设为低频
         String zipKey = prefix + "/archive/" + zipFile.getName();
+        System.out.println("zip文件key = " + zipKey);
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 s3Service.getBucketName(), zipKey, zipFile);
         putObjectRequest.withStorageClass(StorageClass.StandardInfrequentAccess);
