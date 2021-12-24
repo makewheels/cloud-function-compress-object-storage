@@ -73,7 +73,6 @@ public class CompressHandler {
             });
         }
         System.out.println("结束下载 " + System.currentTimeMillis());
-        executorService.shutdown();
 
         // 组装zip清单文件
         String zipId = IdUtil.getSnowflake().nextIdStr();
