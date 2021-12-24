@@ -1,0 +1,13 @@
+{
+  "compressVersion": "1",
+  "pathList": [
+    {
+      "prefix": "spider/huobi/buy-usdt-cny",
+      "fileAmountForCompress": 200
+    },
+    {
+      "prefix": "spider/huobi/sell-usdt-cny",
+      "fileAmountForCompress": 200
+    }
+  ]
+}
