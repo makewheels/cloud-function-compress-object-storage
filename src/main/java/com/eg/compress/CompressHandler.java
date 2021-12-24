@@ -74,6 +74,7 @@ public class CompressHandler {
             });
         }
         System.out.println("结束下载 " + System.currentTimeMillis());
+        executorService.shutdown();
         try {
             executorService.awaitTermination(1, TimeUnit.HOURS);
         } catch (InterruptedException e) {
