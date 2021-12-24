@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class CompressHandler {
     private final S3Service s3Service = new S3Service();
@@ -73,6 +74,11 @@ public class CompressHandler {
             });
         }
         System.out.println("结束下载 " + System.currentTimeMillis());
+        try {
+            executorService.awaitTermination(1, TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // 组装zip清单文件
         String zipId = IdUtil.getSnowflake().nextIdStr();
