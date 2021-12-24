@@ -54,7 +54,7 @@ public class CompressHandler {
         // 批量下载文件
         // 获取下载nas的磁盘工作目录
         File workDir = new File(System.getenv("work_dir"), prefix);
-        File compressFolder = new File(workDir, IdUtil.nanoId());
+        File compressFolder = new File(workDir, IdUtil.objectId());
         if (!compressFolder.exists()) {
             compressFolder.mkdirs();
         }
@@ -96,8 +96,9 @@ public class CompressHandler {
         ZipUtil.zip(compressFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
         // 上传zip到对象存储，直接把类型设为低频
+        String zipKey = prefix + "/archive/" + zipFile.getName();
         PutObjectRequest putObjectRequest = new PutObjectRequest(
-                s3Service.getBucketName(), prefix + "/archive/", zipFile);
+                s3Service.getBucketName(), zipKey, zipFile);
         putObjectRequest.withStorageClass(StorageClass.StandardInfrequentAccess);
         s3Service.putObject(putObjectRequest);
 
