@@ -121,7 +121,7 @@ public class CompressHandler {
         List<Tag> tags = new ArrayList<>();
         tags.add(new Tag("type", "compress-package"));
         ObjectTagging objectTagging = new ObjectTagging(tags);
-        putObjectRequest.withTagging(objectTagging);
+//        putObjectRequest.withTagging(objectTagging);
         s3Service.putObject(putObjectRequest);
 
         // 删除对象存储data文件
