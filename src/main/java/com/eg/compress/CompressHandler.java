@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.amazonaws.HttpMethod;
@@ -32,6 +33,7 @@ public class CompressHandler {
         s3Config.setBucketName(System.getenv("s3_bucketName"));
         s3Config.setAccessKey(System.getenv("s3_accessKey"));
         s3Config.setSecretKey(System.getenv("s3_secretKey"));
+        System.out.println(JSON.toJSONString(s3Config));
         s3Service.init(s3Config);
     }
 
