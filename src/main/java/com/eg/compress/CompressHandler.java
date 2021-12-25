@@ -33,7 +33,6 @@ public class CompressHandler {
         s3Config.setBucketName(System.getenv("s3_bucketName"));
         s3Config.setAccessKey(System.getenv("s3_accessKey"));
         s3Config.setSecretKey(System.getenv("s3_secretKey"));
-        System.out.println(JSON.toJSONString(s3Config));
         s3Service.init(s3Config);
     }
 
