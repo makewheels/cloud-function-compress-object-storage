@@ -56,7 +56,7 @@ public class CompressHandler {
         ObjectListing objectListing = s3Service.listObjects(listObjectsRequest);
         List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
         if (objectSummaries.size() != fileAmountForCompress) {
-            System.out.println("大小不足，跳过，objectSummaries.size() = " + objectSummaries.size());
+            System.out.println("object数量不足，跳过，objectSummaries.size() = " + objectSummaries.size());
             return;
         }
 
