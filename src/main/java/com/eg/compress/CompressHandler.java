@@ -46,14 +46,15 @@ public class CompressHandler {
 
     private void handleEachPath(JSONObject config, String prefix, int fileAmountForCompress)
             throws InterruptedException {
-        System.out.println("开始执行CompressHandler.handleEachPath");
+        System.out.print("开始执行CompressHandler.handleEachPath ");
         System.out.println("prefix = " + prefix);
         // 请求文件列表
-        ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withMaxKeys(fileAmountForCompress).withPrefix(prefix);
+        ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+                .withMaxKeys(fileAmountForCompress).withPrefix(prefix);
         ObjectListing objectListing = s3Service.listObjects(listObjectsRequest);
         List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
         if (objectSummaries.size() != fileAmountForCompress) {
-            return;
+//            return;
         }
 
         // 批量下载文件
@@ -65,7 +66,6 @@ public class CompressHandler {
         }
 
         ExecutorService executorService = Executors.newFixedThreadPool(10);
-        System.out.println("开始下载 " + System.currentTimeMillis());
         for (S3ObjectSummary objectSummary : objectSummaries) {
             String key = objectSummary.getKey();
 
@@ -75,12 +75,15 @@ public class CompressHandler {
                 HttpUtil.downloadFile(url, file);
             });
         }
-        System.out.println("结束下载 " + System.currentTimeMillis());
         executorService.shutdown();
         executorService.awaitTermination(10, TimeUnit.MINUTES);
 
         // 组装zip清单文件
         String zipId = IdUtil.getSnowflake().nextIdStr();
+
+        File zipFile = new File(workDir, zipId + ".zip");
+        String zipKey = prefix + "/archive/" + zipFile.getName();
+
         JSONObject manifest = new JSONObject();
         manifest.put("compressVersion", config.getString("compressVersion"));
         manifest.put("invokeId", InvokeUtil.getInvokeId());
@@ -90,6 +93,7 @@ public class CompressHandler {
         manifest.put("providerParams", InvokeUtil.getProviderParams());
         manifest.put("prefix", prefix);
         manifest.put("fileAmountForCompress", fileAmountForCompress);
+        manifest.put("compressFileObjectKey", zipKey);
 
         JSONArray fileList = new JSONArray();
         for (S3ObjectSummary objectSummary : objectSummaries) {
@@ -109,13 +113,11 @@ public class CompressHandler {
         FileUtil.writeString(manifest.toJSONString(), manifestFile, StandardCharsets.UTF_8);
 
         // 压缩
-        File zipFile = new File(workDir, zipId + ".zip");
         System.out.println("压缩文件，源文件夹：" + compressFolder.getAbsolutePath());
         System.out.println("压缩文件，目标文件：" + zipFile.getAbsolutePath());
         ZipUtil.zip(compressFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
         // 上传zip到对象存储，直接把类型设为低频
-        String zipKey = prefix + "/archive/" + zipFile.getName();
         System.out.println("zip文件key = " + zipKey);
         PutObjectRequest putObjectRequest = new PutObjectRequest(s3Service.getBucketName(), zipKey, zipFile);
         putObjectRequest.withStorageClass(StorageClass.StandardInfrequentAccess);
