@@ -86,7 +86,7 @@ public class CompressHandler {
 
         JSONObject manifest = new JSONObject();
         manifest.put("compressVersion", config.getString("compressVersion"));
-        manifest.put("invokeId", InvokeUtil.getInvokeId());
+        manifest.put("invokeId", IdUtil.getSnowflake().nextIdStr());
         manifest.put("provider", "aliyun-fc");
         manifest.put("createTime", Instant.now().toString());
         manifest.put("compressId", zipId);
