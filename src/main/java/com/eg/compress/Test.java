@@ -15,34 +15,33 @@ public class Test {
         s3Config.setRegion("cn-hongkong");
         s3Config.setBucketName("spider-hongkong");
         s3Config.setAccessKey("LTAI5tPBYe47wSKExKA9Za3y");
-        s3Config.setSecretKey("");
+        s3Config.setSecretKey("YTNRvO8ThNHFQeE6P76adcS7CTHqm1");
         S3Service s3Service = new S3Service();
         s3Service.init(s3Config);
 
-        ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-                .withMaxKeys(2)
-                .withBucketName("spider-hongkong")
-                .withPrefix("spider/huobi");
-        ObjectListing objectListing = s3Service.listObjects(listObjectsRequest);
-        System.out.println("getNextMarker " + objectListing.getNextMarker());
-        System.out.println();
-        List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
-        System.out.println(JSON.toJSONString(objectSummaries));
-        for (S3ObjectSummary objectSummary : objectSummaries) {
-            String key = objectSummary.getKey();
-            System.out.println(key + " " + objectSummary.getStorageClass());
-        }
-
+//        ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+//                .withMaxKeys(2)
+//                .withBucketName("spider-hongkong")
+//                .withPrefix("spider/huobi");
+//        ObjectListing objectListing = s3Service.listObjects(listObjectsRequest);
+//        System.out.println("getNextMarker " + objectListing.getNextMarker());
+//        System.out.println();
+//        List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
+//        System.out.println(JSON.toJSONString(objectSummaries));
+//        for (S3ObjectSummary objectSummary : objectSummaries) {
+//            String key = objectSummary.getKey();
+//            System.out.println(key + " " + objectSummary.getStorageClass());
+//        }
 
         // 上传zip到对象存储，直接把类型设为低频
-        File file = new File("D:\\workSpace\\AndroidStudio\\Chat\\build\\" +
-                "intermediates\\lint-cache\\maven.google\\master-index.xml");
+        File file = new File("D:\\Programming\\JavaEE\\projects\\记账系统\\design\\数据库设计.pdm");
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 s3Service.getBucketName(), "test/000aaa.xml"
                 + System.currentTimeMillis(), file);
 
-        putObjectRequest.withStorageClass("IA");
-        s3Service.putObject(putObjectRequest);
+        putObjectRequest.withStorageClass(StorageClass.StandardInfrequentAccess);
+        PutObjectResult putObjectResult = s3Service.putObject(putObjectRequest);
+        System.out.println(JSON.toJSONString(putObjectResult));
 
     }
 }

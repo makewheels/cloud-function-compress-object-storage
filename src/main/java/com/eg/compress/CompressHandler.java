@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +44,9 @@ public class CompressHandler {
         return JSONObject.parseObject(configJson);
     }
 
-    private void handleEachPath(JSONObject config, String prefix, int fileAmountForCompress) {
+    private void handleEachPath(JSONObject config, String prefix, int fileAmountForCompress) throws InterruptedException {
         // 请求文件列表
-        ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-                .withMaxKeys(fileAmountForCompress)
-                .withPrefix(prefix);
+        ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withMaxKeys(fileAmountForCompress).withPrefix(prefix);
         ObjectListing objectListing = s3Service.listObjects(listObjectsRequest);
         List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
         if (objectSummaries.size() != fileAmountForCompress) {
@@ -75,11 +74,7 @@ public class CompressHandler {
         }
         System.out.println("结束下载 " + System.currentTimeMillis());
         executorService.shutdown();
-        try {
-            executorService.awaitTermination(1, TimeUnit.HOURS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        executorService.awaitTermination(10, TimeUnit.MINUTES);
 
         // 组装zip清单文件
         String zipId = IdUtil.getSnowflake().nextIdStr();
@@ -87,7 +82,9 @@ public class CompressHandler {
         manifest.put("compressVersion", config.getString("compressVersion"));
         manifest.put("invokeId", InvokeUtil.getInvokeId());
         manifest.put("provider", "aliyun-fc");
-        manifest.put("createTime", Instant.now().toString());
+        manifest.put("createTime", Instant.now().
+
+                toString());
         manifest.put("compressId", zipId);
         manifest.put("providerParams", InvokeUtil.getProviderParams());
 
@@ -115,21 +112,31 @@ public class CompressHandler {
         // 上传zip到对象存储，直接把类型设为低频
         String zipKey = prefix + "/archive/" + zipFile.getName();
         System.out.println("zip文件key = " + zipKey);
-        PutObjectRequest putObjectRequest = new PutObjectRequest(
-                s3Service.getBucketName(), zipKey, zipFile);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(s3Service.getBucketName(), zipKey, zipFile);
         putObjectRequest.withStorageClass(StorageClass.StandardInfrequentAccess);
-        List<Tag> tags = new ArrayList<>();
-        tags.add(new Tag("type", "compress-package"));
-        ObjectTagging objectTagging = new ObjectTagging(tags);
+//        List<Tag> tags = new ArrayList<>();
+//        tags.add(new Tag("type", "compress-package"));
+//        ObjectTagging objectTagging = new ObjectTagging(tags);
 //        putObjectRequest.withTagging(objectTagging);
         s3Service.putObject(putObjectRequest);
+
+        //拷贝到垃圾箱目录
+        executorService = Executors.newFixedThreadPool(10);
+        for (S3ObjectSummary objectSummary : objectSummaries) {
+            String key = objectSummary.getKey();
+            executorService.submit(() -> {
+                s3Service.copyObject(key, ".trash/" + key);
+            });
+        }
+        executorService.shutdown();
+        executorService.awaitTermination(10, TimeUnit.MINUTES);
 
         // 删除对象存储data文件
         List<String> keys = new ArrayList<>();
         for (S3ObjectSummary objectSummary : objectSummaries) {
             keys.add(objectSummary.getKey());
         }
-//        s3Service.deleteObjects(keys);
+        s3Service.deleteObjects(keys);
 
         // 删除本地文件
         boolean del = FileUtil.del(workDir);
@@ -143,7 +150,11 @@ public class CompressHandler {
             JSONObject each = pathList.getJSONObject(i);
             String prefix = each.getString("prefix");
             Integer fileAmountForCompress = each.getInteger("fileAmountForCompress");
-            handleEachPath(config, prefix, fileAmountForCompress);
+            try {
+                handleEachPath(config, prefix, fileAmountForCompress);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
