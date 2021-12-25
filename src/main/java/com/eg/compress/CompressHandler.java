@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.amazonaws.HttpMethod;
@@ -18,7 +17,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +54,7 @@ public class CompressHandler {
         List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
         if (objectSummaries.size() != fileAmountForCompress) {
             System.out.println("object数量不足，跳过，objectSummaries.size() = " + objectSummaries.size());
-            return;
+//            return;
         }
 
         // 批量下载文件
