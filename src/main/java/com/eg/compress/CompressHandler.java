@@ -44,7 +44,10 @@ public class CompressHandler {
         return JSONObject.parseObject(configJson);
     }
 
-    private void handleEachPath(JSONObject config, String prefix, int fileAmountForCompress) throws InterruptedException {
+    private void handleEachPath(JSONObject config, String prefix, int fileAmountForCompress)
+            throws InterruptedException {
+        System.out.println("开始执行CompressHandler.handleEachPath");
+        System.out.println("prefix = " + prefix);
         // 请求文件列表
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withMaxKeys(fileAmountForCompress).withPrefix(prefix);
         ObjectListing objectListing = s3Service.listObjects(listObjectsRequest);
@@ -82,19 +85,21 @@ public class CompressHandler {
         manifest.put("compressVersion", config.getString("compressVersion"));
         manifest.put("invokeId", InvokeUtil.getInvokeId());
         manifest.put("provider", "aliyun-fc");
-        manifest.put("createTime", Instant.now().
-
-                toString());
+        manifest.put("createTime", Instant.now().toString());
         manifest.put("compressId", zipId);
         manifest.put("providerParams", InvokeUtil.getProviderParams());
+        manifest.put("prefix", prefix);
+        manifest.put("fileAmountForCompress", fileAmountForCompress);
 
         JSONArray fileList = new JSONArray();
         for (S3ObjectSummary objectSummary : objectSummaries) {
             JSONObject each = new JSONObject();
-            each.put("key", objectSummary.getKey());
+            String key = objectSummary.getKey();
+            each.put("objectKey", key);
             each.put("size", objectSummary.getSize());
             each.put("eTag", objectSummary.getETag());
             each.put("lastModified", objectSummary.getLastModified());
+            each.put("fileName", FileUtil.getName(key));
             fileList.add(each);
         }
         manifest.put("fileList", fileList);
