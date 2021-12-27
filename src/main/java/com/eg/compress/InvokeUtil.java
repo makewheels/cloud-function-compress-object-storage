@@ -1,5 +1,6 @@
 package com.eg.compress;
 
+import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.fc.runtime.Context;
 import com.aliyun.fc.runtime.FunctionParam;
@@ -11,6 +12,7 @@ public class InvokeUtil {
     private static InputStream input;
     private static OutputStream output;
     private static Context context;
+    private static String invokeId;
 
     public static InputStream getInput() {
         return input;
@@ -28,6 +30,13 @@ public class InvokeUtil {
         InvokeUtil.input = input;
         InvokeUtil.output = output;
         InvokeUtil.context = context;
+    }
+
+    public static String getInvokeId() {
+        if (invokeId == null) {
+            invokeId = IdUtil.getSnowflake().nextIdStr();
+        }
+        return invokeId;
     }
 
     public static JSONObject getProviderParams() {
